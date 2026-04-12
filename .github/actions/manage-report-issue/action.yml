@@ -1,0 +1,76 @@
+name: "Manage Report Issue"
+description: >
+  Manages the full lifecycle of a governance report issue:
+  creates, updates, reopens, or closes based on whether violations were found.
+inputs:
+  title:
+    description: "The issue title used to find and manage the report issue"
+    required: true
+  report-path:
+    description: "Path to the markdown report file"
+    required: true
+  has-violations:
+    description: "Whether the report found any violations ('true' or 'false')"
+    required: true
+  token:
+    description: "GitHub token for API access"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        TITLE: ${{ inputs.title }}
+        HAS_VIOLATIONS: ${{ inputs.has-violations }}
+        REPORT_PATH: ${{ inputs.report-path }}
+      run: |
+        set -euo pipefail
+
+        # Find existing issue by exact title (any state)
+        ISSUE_NUMBER=$(
+          gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state all \
+            --search "in:title \"${TITLE}\"" \
+            --json number,title \
+            --jq ".[] | select(.title == \"${TITLE}\") | .number" \
+          | head -1
+        )
+
+        if [ "$HAS_VIOLATIONS" = "true" ]; then
+          if [ -n "$ISSUE_NUMBER" ]; then
+            echo "Updating existing issue #${ISSUE_NUMBER}"
+            gh issue edit "$ISSUE_NUMBER" \
+              --repo "$GITHUB_REPOSITORY" \
+              --body-file "$REPORT_PATH"
+            gh issue reopen "$ISSUE_NUMBER" \
+              --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+          else
+            echo "Creating new report issue"
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --body-file "$REPORT_PATH"
+          fi
+        else
+          if [ -n "$ISSUE_NUMBER" ]; then
+            ISSUE_STATE=$(
+              gh issue view "$ISSUE_NUMBER" \
+                --repo "$GITHUB_REPOSITORY" \
+                --json state \
+                --jq .state
+            )
+            if [ "$ISSUE_STATE" = "OPEN" ]; then
+              echo "Closing resolved issue #${ISSUE_NUMBER}"
+              gh issue close "$ISSUE_NUMBER" \
+                --repo "$GITHUB_REPOSITORY" \
+                --comment "✅ All violations have been resolved."
+            else
+              echo "No open issue to close"
+            fi
+          else
+            echo "No violations and no existing issue — nothing to do"
+          fi
+        fi

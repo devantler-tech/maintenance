@@ -53,9 +53,10 @@ jobs:
         run: |
           bun run report:repos-with-no-team
 
-      - name: Upload report to issue
-        uses: step-security/create-issue-from-file@7444673975a4ae46c089644f50930db91fc53e4f # v6.0.0
+      - name: Manage report issue
+        uses: ./.github/actions/manage-report-issue
         with:
           title: "[report] Repos with No Team Assigned"
-          content-filepath: ${{ steps.report.outputs.report-path }}
+          report-path: ${{ steps.report.outputs.report-path }}
+          has-violations: ${{ steps.report.outputs.has-violations }}
           token: ${{ steps.get-token.outputs.token }}
