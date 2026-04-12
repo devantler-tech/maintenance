@@ -51,6 +51,50 @@ jobs:
       - name: Run tests
         run: bun test
 
+  update-lockfile:
+    name: Update Lockfile
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Upload patch
+        run: |
+          git diff -- bun.lock > /tmp/update-lockfile.patch
+          if [ -s /tmp/update-lockfile.patch ]; then
+            echo "Lockfile changes detected"
+          else
+            echo "No lockfile changes"
+          fi
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: update-lockfile-patch
+          path: /tmp/update-lockfile.patch
+          if-no-files-found: ignore
+          retention-days: 1
+
   auto-format:
     name: Auto-Format
     runs-on: ubuntu-latest
@@ -58,6 +102,55 @@ jobs:
     if: >-
       github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run formatter
+        run: bun run format:fix
+
+      - name: Upload patch
+        run: |
+          git diff -- ':!bun.lock' > /tmp/auto-format.patch
+          if [ -s /tmp/auto-format.patch ]; then
+            echo "Formatting changes detected"
+          else
+            echo "No formatting changes"
+          fi
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: auto-format-patch
+          path: /tmp/auto-format.patch
+          if-no-files-found: ignore
+          retention-days: 1
+
+  auto-commit:
+    name: Auto-Commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [update-lockfile, auto-format]
+    if: >-
+      always()
+      && (needs.update-lockfile.result == 'success'
+        || needs.auto-format.result == 'success')
     permissions:
       contents: write
     steps:
@@ -80,19 +173,36 @@ jobs:
           persist-credentials: true
           token: ${{ steps.generate-token.outputs.token }}
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - name: Download patches
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          bun-version: latest
+          pattern: "*-patch"
+          merge-multiple: true
+          path: /tmp/patches
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - name: Apply patches
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
 
-      - name: Run formatter
-        run: bun run format:fix
+          for patch in /tmp/patches/*.patch; do
+            if [ -s "$patch" ]; then
+              patch_name="$(basename "$patch")"
+              echo "Applying ${patch_name}..."
 
-      - name: Commit formatting changes
+              if git apply --3way "$patch"; then
+                echo "Applied ${patch_name} with 3-way merge."
+              else
+                echo "::error::Failed to apply patch ${patch_name}." >&2
+                exit 1
+              fi
+            else
+              echo "Skipping empty patch $(basename "$patch")"
+            fi
+          done
+
+      - name: Commit and push changes
         uses: step-security/git-auto-commit-action@905c3cd6e9ed2b67b4d46ff401fdb6d745d0ff9d # v7.1.0
         with:
-          commit_message: "style: auto-format with prettier"
+          commit_message: "chore: auto-fix lockfile and formatting"
           branch: ${{ github.head_ref }}
