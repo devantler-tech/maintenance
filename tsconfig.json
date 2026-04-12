@@ -21,8 +21,8 @@
     "noPropertyAccessFromIndexSignature": false,
 
     "paths": {
-      "@lib/*": ["./lib/*"],
-      "@test/*": ["./test/*"]
+      "@lib/*": ["./src/lib/*"],
+      "@test/*": ["./src/test/*"]
     }
   }
 }

@@ -1,6 +1,6 @@
 # Contributing
 
-The project is designed to be extensible. Reusable functions are placed in `lib/` so they can be used by multiple scripts. Report-specific logic goes in `reports/{report-name}/`.
+The project is designed to be extensible. Reusable functions are placed in `src/lib/` so they can be used by multiple scripts. Report-specific logic goes in `src/reports/{report-name}/`.
 
 ## Running a report locally
 
@@ -34,8 +34,8 @@ bun test                # Tests with coverage
 
 ## Adding a new report
 
-1. Create a new directory `reports/{report-name}/` for report-specific logic
-2. Create the main report script at `reports/{report-name}.ts`
-3. Add tests in `reports/{report-name}/find-violations.test.ts` — use `makeTeam`/`makeRepo` from `@test/helpers`
-4. Add `"report:{name}": "bun run reports/{name}.ts"` to `package.json`
+1. Create a new directory `src/reports/{report-name}/` for report-specific logic
+2. Create the main report script at `src/reports/{report-name}.ts`
+3. Add tests in `src/reports/{report-name}/find-violations.test.ts` — use `makeTeam`/`makeRepo` from `@test/helpers`
+4. Add `"report:{name}": "bun run src/reports/{name}.ts"` to `package.json`
 5. Add a workflow in `.github/workflows/report-{name}.yml` following the existing pattern

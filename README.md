@@ -6,12 +6,12 @@ CLI tools for GitHub organization maintenance — generating governance reports 
 
 Reports follow a three-layer pattern:
 
-1. **Entry point** (`reports/{name}.ts`) — executable script run via `bun run report:{name} [org]`. Org defaults to `devantler-tech`.
-2. **Report logic** (`reports/{name}/`) — pure functions for violation detection and markdown rendering:
+1. **Entry point** (`src/reports/{name}.ts`) — executable script run via `bun run report:{name} [org]`. Org defaults to `devantler-tech`.
+2. **Report logic** (`src/reports/{name}/`) — pure functions for violation detection and markdown rendering:
    - `find-violations.ts` — `(teams, repos) → violations[]` (no side effects)
    - `generate-markdown-report.ts` — `(violations) → string`
    - `find-violations.test.ts` — co-located unit tests
-3. **Shared library** (`lib/`) — caching, GitHub API, output, logging. Import via `@lib/*` path alias.
+3. **Shared library** (`src/lib/`) — caching, GitHub API, output, logging. Import via `@lib/*` path alias.
 
 Two orchestration patterns exist:
 

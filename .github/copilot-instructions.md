@@ -6,12 +6,12 @@ CLI tools for GitHub organization maintenance — generating governance reports 
 
 Reports follow a strict three-layer pattern:
 
-1. **Entry point** (`reports/{name}.ts`) — executable script run via `bun run report:{name} [org]`. Org defaults to `devantler-tech`.
-2. **Report logic** (`reports/{name}/`) — pure functions for violation detection and markdown rendering:
+1. **Entry point** (`src/reports/{name}.ts`) — executable script run via `bun run report:{name} [org]`. Org defaults to `devantler-tech`.
+2. **Report logic** (`src/reports/{name}/`) — pure functions for violation detection and markdown rendering:
    - `find-violations.ts` — `(teams, repos) → violations[]` (no side effects)
    - `generate-markdown-report.ts` — `(violations) → string`
    - `find-violations.test.ts` — co-located unit tests
-3. **Shared library** (`lib/`) — caching, GitHub API, output, logging. Import via `@lib/*` path alias.
+3. **Shared library** (`src/lib/`) — caching, GitHub API, output, logging. Import via `@lib/*` path alias.
 
 Two orchestration patterns exist:
 
@@ -22,7 +22,7 @@ Two orchestration patterns exist:
 
 ```bash
 bun run ci                                    # Full CI: typecheck → lint → format → test
-bun run report:repos-with-no-team             # Run a report locally (requires GH_TOKEN in .env)
+bun run report:repos-with-no-team             # Run a report locally (requires GH_TOKEN in .env or .env.local)
 bun test                                      # Tests with coverage (enabled in bunfig.toml)
 ```
 
@@ -38,7 +38,7 @@ CI runs `tsc --noEmit`, `eslint .` (type-checked rules), `prettier --check .`, a
 
 ## Testing Patterns
 
-Tests use Bun's built-in runner (`bun:test`). Shared test factories in `test/helpers.ts`:
+Tests use Bun's built-in runner (`bun:test`). Shared test factories in `src/test/helpers.ts`:
 
 - `makeTeam({ name, slug, ... })` — Team fixture with empty defaults for members/repos/permissions
 - `makeRepo({ name, ... })` — OrgRepo fixture with auto-generated URL, `"private"` visibility
@@ -54,12 +54,12 @@ Report-specific tests only cover behavior unique to that report. Shared behavior
 
 Report workflows (`.github/workflows/report-*.yml`) follow an identical structure: cron trigger → checkout → setup-bun → install → get GitHub App token via `actions/create-github-app-token` → run report → create/update issue via `peter-evans/create-issue-from-file`.
 
-The CI workflow (`ci.yml`) runs on PRs/pushes and includes a `zizmor` security scan for workflow files.
+The CI workflow (`ci.yml`) runs on PRs/pushes.
 
 ## Adding a New Report
 
-1. Create `reports/{name}/find-violations.ts` (pure function) and `generate-markdown-report.ts`
-2. Create `reports/{name}.ts` entry point — use `runRepoViolationReport()` if the report checks repos against teams
-3. Add tests in `reports/{name}/find-violations.test.ts` — use `makeTeam`/`makeRepo` from `@test/helpers`
-4. Add `"report:{name}": "bun run reports/{name}.ts"` to `package.json`
+1. Create `src/reports/{name}/find-violations.ts` (pure function) and `generate-markdown-report.ts`
+2. Create `src/reports/{name}.ts` entry point — use `runRepoViolationReport()` if the report checks repos against teams
+3. Add tests in `src/reports/{name}/find-violations.test.ts` — use `makeTeam`/`makeRepo` from `@test/helpers`
+4. Add `"report:{name}": "bun run src/reports/{name}.ts"` to `package.json`
 5. Add a workflow in `.github/workflows/report-{name}.yml` following the existing pattern
