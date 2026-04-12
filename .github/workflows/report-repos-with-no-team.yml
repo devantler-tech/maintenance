@@ -54,9 +54,10 @@ jobs:
           bun run report:repos-with-no-team
 
       - name: Manage report issue
-        uses: ./.github/actions/manage-report-issue
+        uses: devantler-tech/actions/upsert-issue@main
         with:
           title: "[report] Repos with No Team Assigned"
-          report-path: ${{ steps.report.outputs.report-path }}
-          has-violations: ${{ steps.report.outputs.has-violations }}
-          token: ${{ steps.get-token.outputs.token }}
+          body-file: ${{ steps.report.outputs.report-path }}
+          open: ${{ steps.report.outputs.has-violations }}
+          close-comment: "✅ All violations have been resolved."
+          github-token: ${{ steps.get-token.outputs.token }}
