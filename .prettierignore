@@ -1,0 +1,4 @@
+bun.lockb
+.cache/
+report-*.md
+node_modules/

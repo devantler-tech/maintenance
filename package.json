@@ -1,0 +1,30 @@
+{
+  "name": "maintenance",
+  "version": "1.0.0",
+  "description": "CLI tools for GitHub organization maintenance — governance reports that run on cron schedules and surface violations as GitHub issues",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "ci": "bun run typecheck && bun run lint && bun run format:check && bun test",
+    "report:repos-with-no-team": "bun run reports/repos-with-no-team.ts",
+    "report:repos-with-no-admin-team": "bun run reports/repos-with-no-admin-team.ts",
+    "report:repos-with-multi-admin-teams": "bun run reports/repos-with-multi-admin-teams.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "latest",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0"
+  },
+  "dependencies": {
+    "octokit": "^5.0.5",
+    "picocolors": "^1.1.1"
+  }
+}
