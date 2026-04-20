@@ -206,3 +206,36 @@ jobs:
         with:
           commit_message: "chore: auto-fix lockfile and formatting"
           branch: ${{ github.head_ref }}
+
+  required-checks:
+    name: CI - Required Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [ci, auto-commit]
+    permissions: {}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        with:
+          egress-policy: audit
+
+      - name: Verify required checks passed
+        env:
+          CI_RESULT: ${{ needs.ci.result }}
+          AUTO_COMMIT_RESULT: ${{ needs.auto-commit.result }}
+        run: |
+          echo "ci: $CI_RESULT"
+          echo "auto-commit: $AUTO_COMMIT_RESULT"
+
+          if [[ "$CI_RESULT" != "success" ]]; then
+            echo "::error::CI checks failed or were cancelled."
+            exit 1
+          fi
+
+          if [[ "$AUTO_COMMIT_RESULT" != "success" && "$AUTO_COMMIT_RESULT" != "skipped" ]]; then
+            echo "::error::Auto-commit failed or was cancelled."
+            exit 1
+          fi
+
+          echo "All required checks passed."
