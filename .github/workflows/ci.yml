@@ -221,17 +221,20 @@ jobs:
           egress-policy: audit
 
       - name: Verify required checks passed
+        env:
+          CI_RESULT: ${{ needs.ci.result }}
+          AUTO_COMMIT_RESULT: ${{ needs.auto-commit.result }}
         run: |
-          echo "ci: ${{ needs.ci.result }}"
-          echo "auto-commit: ${{ needs.auto-commit.result }}"
+          echo "ci: $CI_RESULT"
+          echo "auto-commit: $AUTO_COMMIT_RESULT"
 
-          if [[ "${{ needs.ci.result }}" != "success" ]]; then
+          if [[ "$CI_RESULT" != "success" ]]; then
             echo "::error::CI checks failed or were cancelled."
             exit 1
           fi
 
-          if [[ "${{ needs.auto-commit.result }}" == "failure" ]]; then
-            echo "::error::Auto-commit failed."
+          if [[ "$AUTO_COMMIT_RESULT" != "success" && "$AUTO_COMMIT_RESULT" != "skipped" ]]; then
+            echo "::error::Auto-commit failed or was cancelled."
             exit 1
           fi
 
