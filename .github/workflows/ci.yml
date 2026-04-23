@@ -202,7 +202,7 @@ jobs:
           done
 
       - name: Commit and push changes
-        uses: step-security/git-auto-commit-action@905c3cd6e9ed2b67b4d46ff401fdb6d745d0ff9d # v7.1.0
+        uses: step-security/git-auto-commit-action@749bc1cc775376092cc4227ba537137f445ca7c3 # v7.1.1
         with:
           commit_message: "chore: auto-fix lockfile and formatting"
           branch: ${{ github.head_ref }}
