@@ -49,7 +49,7 @@ jobs:
           bun run report:repos-with-no-team
 
       - name: Manage report issue
-        uses: devantler-tech/actions/upsert-issue@0e1232924bf8b07a40b1b24e13e200744fbabcfa # v6.0.0
+        uses: devantler-tech/actions/upsert-issue@40816acee2940a3b46bd5c042a023ee24528353b # v6.0.1
         with:
           title: "[report] Repos with No Team Assigned"
           body-file: ${{ steps.report.outputs.report-path }}
