@@ -1,3 +1,5 @@
+TO BE DEPRECATED. WILL BE MERGED INTO devantler-tech/.github AS A SINGLE-SOURCE-OF-TRUTH FOR THIS GITHUB ORGS GOVERNANCE, ADMINISTRATION AND CONFIGURATION
+
 # maintenance
 
 CLI tools for GitHub organization maintenance — generating governance reports that run on cron schedules and surface violations as GitHub issues.
