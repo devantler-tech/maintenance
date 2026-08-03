@@ -49,7 +49,7 @@ jobs:
           bun run report:repos-with-multi-admin-teams
 
       - name: Manage report issue
-        uses: devantler-tech/actions/upsert-issue@625b7c0cd5ad4a04f9eb7494298c6d0fa44521ef # v11.0.4
+        uses: devantler-tech/actions/upsert-issue@4f9b2bb971efb754b719e8ecb39bdf74b2490c33 # v13.0.0
         with:
           title: "[report] Repos with Multiple Admin Teams"
           body-file: ${{ steps.report.outputs.report-path }}
