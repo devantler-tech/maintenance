@@ -10,8 +10,10 @@ public issue or PR. Do not include credentials or private organization data in e
 
 ## Make a first change
 
-Install Git, Node.js 24 or later for the check tools, and [Bun](https://bun.sh/docs/installation);
-CI uses the latest Bun release. Fork the repository on GitHub. Replace `YOUR-LOGIN` with your login,
+Install Git, [Bun](https://bun.sh/docs/installation), and Node.js compatible with the locked check
+tools. ESLint currently accepts Node.js 20.19+ within 20.x, 22.13+ within 22.x, or 24 and later;
+the repository itself does not pin Node.js. CI uses the latest Bun release.
+Fork the repository on GitHub. Replace `YOUR-LOGIN` with your login,
 then run:
 
 ```sh

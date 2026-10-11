@@ -10,8 +10,9 @@ workflows described here still live in this repository.
 
 ## Try the development checks
 
-You need Git, Node.js 24 or later for the check tools, and [Bun](https://bun.sh/docs/installation).
-CI uses the latest Bun release. From a new checkout:
+You need Git, [Bun](https://bun.sh/docs/installation), and Node.js compatible with the locked check
+tools. ESLint currently accepts Node.js 20.19+ within 20.x, 22.13+ within 22.x, or 24 and later;
+the repository itself does not pin Node.js. CI uses the latest Bun release. From a new checkout:
 
 ```sh
 git clone https://github.com/devantler-tech/maintenance.git
