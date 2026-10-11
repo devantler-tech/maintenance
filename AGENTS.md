@@ -52,7 +52,7 @@ Report-specific tests only cover behavior unique to that report. Shared behavior
 
 ## Workflows
 
-Report workflows (`.github/workflows/report-*.yml`) follow an identical structure: cron trigger → checkout → setup-bun → install → get GitHub App token via `actions/create-github-app-token` → run report → create/update issue via `peter-evans/create-issue-from-file`.
+Report workflows (`.github/workflows/report-*.yml`) follow an identical structure: cron trigger → checkout → setup-bun → install → get GitHub App token via `actions/create-github-app-token` → run report → manage the issue via `devantler-tech/actions/upsert-issue`.
 
 The CI workflow (`ci.yml`) runs on PRs/pushes.
 
