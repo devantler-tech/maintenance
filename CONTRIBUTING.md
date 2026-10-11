@@ -88,6 +88,8 @@ Omitting the argument selects `devantler-tech`; do not rely on that default for 
 organization. Each command writes a dated `report-*.md` file and exits. Local CLI runs do not create
 GitHub issues; the scheduled workflows perform that separate write. Reports and cached API data may
 contain private organization information: keep them out of public issues, commits and attachments.
+If `GITHUB_OUTPUT` is set, the CLI also appends report metadata to that file; leave it unset for
+ordinary local runs.
 The ignored `.cache/` directory has no automatic expiry; move aside only this checkout's report
 cache before a run that requires fresh data. Keep or remove your local generated reports according
 to your organization's data-handling rules.
